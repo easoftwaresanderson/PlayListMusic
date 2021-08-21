@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppMusicPlayLists.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,9 +13,24 @@ namespace AppMusicPlayLists.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class SongsPage : ContentPage
     {
+        private SongsViewModel _vm;
         public SongsPage()
         {
             InitializeComponent();
+            _vm = new SongsViewModel();
+            this.BindingContext = _vm;
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+
         }
     }
 }

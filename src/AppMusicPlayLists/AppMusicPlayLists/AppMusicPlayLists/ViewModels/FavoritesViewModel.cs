@@ -19,7 +19,7 @@ namespace AppMusicPlayLists.ViewModels
         {
             _Musics = new ObservableCollection<MusicDTO>();
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
-            LoadItemsCommand.Execute(this);
+            //LoadItemsCommand.Execute(this);
         }
 
 

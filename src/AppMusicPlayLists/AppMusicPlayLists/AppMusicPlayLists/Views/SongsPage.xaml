@@ -9,9 +9,9 @@
              Shell.NavBarIsVisible="False"
              Shell.TabBarIsVisible="True">
 
-    <ContentPage.BindingContext>
+    <!--<ContentPage.BindingContext>
         <vm:SongsViewModel />
-    </ContentPage.BindingContext>
+    </ContentPage.BindingContext>-->
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -20,8 +20,8 @@
     </ContentPage.Resources>
 
 
-    <!--<RefreshView Command="{Binding LoadItemsCommand}" 
-                 IsRefreshing="{Binding IsBusy, Mode=OneTime}">-->
+    <RefreshView Command="{Binding LoadItemsCommand}" 
+                 IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
 
         <FlexLayout Direction="Column"
                         AlignItems="Stretch"
@@ -98,7 +98,7 @@
                     <CollectionView 
                         x:Name="SongsCollectionView"
                         Margin="0,10,0,0"
-                        ItemsSource="{Binding GetSongs}"
+                        ItemsSource="{Binding GetSongs,Mode=OneWay }"
                         SelectionMode="None"
                         BackgroundColor="Transparent"
                         Grid.Row="1"
@@ -206,6 +206,6 @@
 
         </FlexLayout>
         
-    <!--</RefreshView>-->
+    </RefreshView>
     
 </ContentPage>

@@ -40,7 +40,8 @@ namespace AppMusicPlayLists.ViewModels
             FavoriteCommand = new Command<MusicDTO>(OnFavoriteClicked);
 
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
-            LoadItemsCommand.Execute(this);
+            //RefreshView already start execute
+            //LoadItemsCommand.Execute(this);
 
             LoadPlayListCommand = new Command(async () => await LoadPlayListExecute());
             LoadPlayListCommand.Execute(this);
@@ -195,7 +196,7 @@ namespace AppMusicPlayLists.ViewModels
 
                 var device = await DeviceData.GetDeviceByUniqueID(AppSettings.Device.UniqueID);
 
-                if (device == null)
+               if (device == null)
                 {
                     AppSettings.Device.Model = DeviceInfo.Model;
                     AppSettings.Device.Manufacturer = DeviceInfo.Manufacturer;
