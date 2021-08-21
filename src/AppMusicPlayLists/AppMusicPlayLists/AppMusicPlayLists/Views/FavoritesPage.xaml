@@ -8,9 +8,9 @@
              Shell.NavBarIsVisible="False"
              Shell.TabBarIsVisible="True">
 
-    <ContentPage.BindingContext>
+    <!--<ContentPage.BindingContext>
         <vm:FavoritesViewModel/>
-    </ContentPage.BindingContext>
+    </ContentPage.BindingContext>-->
     
     <ContentPage.Content>
 

@@ -11,7 +11,6 @@ namespace APIMusicPlayLists.Core.Interfaces.IServices
     {
         Task<IEnumerable<Device>> Get();
         Task<Device> GetByIdAsync(int id);
-
         Task<Device> GetByDeviceIdAsync(string id);
         Task<ResultDTO> PostAsync(DeviceDTO entity);
         Task<ResultDTO> PutAsync(DeviceDTO entity);

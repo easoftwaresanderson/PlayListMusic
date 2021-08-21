@@ -99,6 +99,25 @@ namespace APIMusicPlayLists.Core.Services
 
         }
 
+        public async Task<ResultDTO> PutAsync(Music data)
+        {
+            ResultDTO res = new ResultDTO();
+
+            try
+            {
+                res.Action = "Put Music";
+                await _repository.UpdateAsync(data);
+
+                return res;
+            }
+            catch (Exception ex)
+            {
+                res.Errors.Add(ex.Message);
+                return res;
+            }
+
+        }
+
         public async Task<ResultDTO> DeleteAsync(int id)
         {
             ResultDTO res = new ResultDTO();
@@ -127,7 +146,7 @@ namespace APIMusicPlayLists.Core.Services
             }
         }
 
-        public async Task<ResultDTO> FavoriteMusic(int id,int favorite)
+        public async Task<ResultDTO> FavoriteSong(int id,int favorite)
         {
 
             ResultDTO res = new ResultDTO();

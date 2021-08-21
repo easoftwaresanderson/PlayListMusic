@@ -13,6 +13,8 @@ namespace APIMusicPlayLists.Core.Interfaces.IServices
         Task<Music> GetByIdAsync(int id);
         Task<ResultDTO> PostAsync(MusicDTO entity);
         Task<ResultDTO> PutAsync(MusicDTO entity);
+        Task<ResultDTO> PutAsync(Music entity);
         Task<ResultDTO> DeleteAsync(int id);
+        Task<ResultDTO> FavoriteSong(int id, int favorite);
     }
 }

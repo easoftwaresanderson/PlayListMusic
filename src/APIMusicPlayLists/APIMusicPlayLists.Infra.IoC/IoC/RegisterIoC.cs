@@ -30,7 +30,6 @@ namespace APIMusicPlayLists.Infra.IoC
             services.AddScoped<IMusicRepository, MusicRepository>();
             services.AddScoped<IMusicServices, MusicServices>();
 
-
             services.AddScoped<IPlayListRepository, PlayListRepository>();
             services.AddScoped<IPlayListServices, PlayListServices>();            
             

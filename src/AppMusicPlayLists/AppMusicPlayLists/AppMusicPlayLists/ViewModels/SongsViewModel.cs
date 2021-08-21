@@ -45,7 +45,6 @@ namespace AppMusicPlayLists.ViewModels
             LoadPlayListCommand = new Command(async () => await LoadPlayListExecute());
             LoadPlayListCommand.Execute(this);
 
-
         }
 
         private async void OnFavoriteClicked(MusicDTO music)
@@ -53,6 +52,7 @@ namespace AppMusicPlayLists.ViewModels
             if (music != null)
             {
                 int idx = _Musics.IndexOf(music);
+
                 if (idx >= 0)
                 {
 
@@ -61,21 +61,21 @@ namespace AppMusicPlayLists.ViewModels
                         AppSettings.PlayList.PlayListMusics = new List<MusicDTO>();
                     }
 
-                    //PlayListFavoriteCommand command = new PlayListFavoriteCommand();
-                    //command.Favorite = music.Favorited == 0 ? 1 : 0;
-                    //command.MusicId = music.Id;
-                    //command.PlayListId = AppSettings.PlayList.Id;
+                    PlayListFavoriteCommand command = new PlayListFavoriteCommand();
+                    command.Favorite = music.Favorited == 0 ? 1 : 0;
+                    command.MusicId = music.Id;
+                    command.PlayListId = AppSettings.PlayList.Id;
 
-                    //var res = await PlayListsData.FavoriteSong(command);
+                    var res = await PlayListsData.FavoriteSong(command);
 
-                    //if(!res.Success)
-                    //{
-                    //    return;
-                    //}
+                    if (!res.Success)
+                    {
+                        return;
+                    }
 
-                    //music.Favorited = command.Favorite;
+                    music.Favorited = command.Favorite;
 
-                    music.Favorited = music.Favorited == 0 ? 1 : 0;
+                    //music.Favorited = music.Favorited == 0 ? 1 : 0;
 
                     _Musics[idx] = music;
                     

@@ -18,11 +18,13 @@ namespace APIMusicPlayLists.API.Controllers
     {
         private readonly ILogger<PlayListController> _logger;
         private IPlayListServices _service;
+        private IMusicServices _musicServices;
 
-        public PlayListController(ILogger<PlayListController> logger, IPlayListServices service)
+        public PlayListController(ILogger<PlayListController> logger, IPlayListServices service, IMusicServices musicServices)
         {
             _logger = logger;
             _service = service;
+            _musicServices = musicServices;
         }
 
         // GET: api/<PlayListController>
@@ -69,8 +71,8 @@ namespace APIMusicPlayLists.API.Controllers
             {
                 return new JsonResult(new { code = ex.GetHashCode(), message = "Oh no.. something bad happened :(", description = ex.Message });
             }
-        }  
-        
+        }
+
         // GET api/<PlayListController>/5
         [HttpGet("device/{id}")]
         public async Task<ActionResult<PlayList>> GetByDeviceID(int id)
@@ -110,10 +112,25 @@ namespace APIMusicPlayLists.API.Controllers
 
         // POST api/<PlayListController>
         [HttpPost("favoritesong")]
-        public async Task<ActionResult<ResultDTO>> FavoriteMusic([FromBody] PlayListFavoriteCommand data)
+        public async Task<ActionResult<ResultDTO>> FavoriteSong([FromBody] PlayListFavoriteCommand data)
         {
             try
             {
+               
+                    var music = await _musicServices.GetByIdAsync(data.MusicId);
+                    
+                    music.Favorite = data.Favorite;
+
+                    return Ok(await _musicServices.PutAsync(music));
+
+
+                    var res = await _service.FavoriteSong(data);
+
+
+                    return Ok(await _musicServices.PutAsync(music));
+
+             
+
                 return Ok(await _service.FavoriteSong(data));
             }
             catch (Exception ex)

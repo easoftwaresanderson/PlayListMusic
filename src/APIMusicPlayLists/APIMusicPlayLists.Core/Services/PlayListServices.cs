@@ -14,13 +14,14 @@ namespace APIMusicPlayLists.Core.Services
     public class PlayListServices : IPlayListServices
     {
         private readonly IRepositoryBase<PlayList> _repository;
-        //private readonly IRepositoryBase<Music> musicrepository;
+        private readonly IRepositoryBase<Music> _musicrepository;
 
         private MusicServices _musicServices;
-        public PlayListServices(IRepositoryBase<PlayList> repository )
+        public PlayListServices(IRepositoryBase<PlayList> repository, IRepositoryBase<Music> musicrepository)
         {
             _repository = repository;
-            //_musicServices = new MusicServices(musicrepository);
+            _musicrepository = musicrepository;
+            _musicServices = new MusicServices(musicrepository);
         }
 
         public async Task<IEnumerable<PlayList>> Get()
@@ -57,6 +58,7 @@ namespace APIMusicPlayLists.Core.Services
                     return res;
                 }
 
+
                 var music = await _musicServices.GetByIdAsync(command.MusicId);
                 if (music == null)
                 {
@@ -81,7 +83,7 @@ namespace APIMusicPlayLists.Core.Services
                 }
 
                 await _repository.UpdateAsync(playList);
-                //await _musicServices.FavoriteMusic(command.MusicId,command.Favorite);
+                await _musicServices.FavoriteSong(command.MusicId,command.Favorite);
 
 
                 return res;
