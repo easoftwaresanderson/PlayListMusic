@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>APIMusicPlayLists</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\APIMusicPlayLists.Core\APIMusicPlayLists.Core.csproj" />
+    <ProjectReference Include="..\APIMusicPlayLists.Infra.IoC\APIMusicPlayLists.Infra.IoC.csproj" />
+    <ProjectReference Include="..\APIMusicPlayLists.Infra.Shared\APIMusicPlayLists.Infra.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
