@@ -44,7 +44,6 @@ namespace APIMusicPlayLists.Core.Services
 
                 Music reg = new Music
                 {
-                    Id = data.Id,
                     AlbumImage = data.AlbumImage,
                     AlbumName = data.AlbumName,
                     AlbumYear = data.AlbumYear,
@@ -153,7 +152,7 @@ namespace APIMusicPlayLists.Core.Services
 
             try
             {
-                res.Action = "Favorite/UnFavorite Music";
+                res.Action = "Favorite / UnFavorite Music";
 
                 var music = await GetByIdAsync(id);
 

@@ -27,7 +27,7 @@ namespace APIMusicPlayList.Infra.Data.EF.Data
         {
             return await _dbContext
                 .Set<T>()
-                .AsNoTracking()
+                //.AsNoTracking()
                 .Where(x => x.Id == id).FirstOrDefaultAsync();
         }
 

@@ -10,8 +10,13 @@ namespace APIMusicPlayLists.Core.Entities
     public class PlayList : BaseEntity
     {
         public string PlayListName { get; set; }
+
+        [ForeignKey("DeviceID")]
         public int DeviceId { get; set; }
-        public virtual ICollection<Music> PlayListMusics { get; set; }
+        [Required]
+        public virtual Device Device { get; set; }
+
+        public virtual ICollection<Music> Musics { get; set; }
 
     }
 }

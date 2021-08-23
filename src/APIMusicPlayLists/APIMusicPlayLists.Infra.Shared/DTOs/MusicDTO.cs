@@ -12,6 +12,6 @@ namespace APIMusicPlayLists.Infra.Shared.DTOs
         public string AlbumName { get; set; }
         public int AlbumYear { get; set; }
         public string AlbumNotes { get; set; }
-        public int Favorited { get; set; }
+        public int Favorite { get; set; }
     }
 }

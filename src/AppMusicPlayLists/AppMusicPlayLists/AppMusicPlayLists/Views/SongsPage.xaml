@@ -175,7 +175,7 @@
                                         TextColor="{StaticResource Secondary}" />
 
                                     <!--Implementar TapGesture alterando o icone-->
-                                    <ImageButton Source="{Binding Favorited,Converter={StaticResource intToFavoriteImage}}"                                        
+                                    <ImageButton Source="{Binding Favorite,Converter={StaticResource intToFavoriteImage}}"                                        
                                         Margin="0,0,0,5"
                                         Grid.Row="0"
                                         Grid.Column="2"

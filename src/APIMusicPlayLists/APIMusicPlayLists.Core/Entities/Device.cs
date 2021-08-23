@@ -1,6 +1,7 @@
 ﻿using APIMusicPlayLists.Core.Base;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace APIMusicPlayLists.Core.Entities
@@ -15,6 +16,10 @@ namespace APIMusicPlayLists.Core.Entities
         public string Platform { get; set; }
         public string Idiom { get; set; }
         public string DeviceType { get; set; }
+
+        [ForeignKey("PlayListID")]
+        public int? PlayListID { get; set; }
+        public virtual PlayList PlayList { get; set; }
 
     }
 }

@@ -112,26 +112,11 @@ namespace APIMusicPlayLists.API.Controllers
 
         // POST api/<PlayListController>
         [HttpPost("favoritesong")]
-        public async Task<ActionResult<ResultDTO>> FavoriteSong([FromBody] PlayListFavoriteCommand data)
+        public async Task<ActionResult<ResultDTO>> FavoriteSong([FromBody] PlayListFavoriteCommand command)
         {
             try
             {
-               
-                    var music = await _musicServices.GetByIdAsync(data.MusicId);
-                    
-                    music.Favorite = data.Favorite;
-
-                    return Ok(await _musicServices.PutAsync(music));
-
-
-                    var res = await _service.FavoriteSong(data);
-
-
-                    return Ok(await _musicServices.PutAsync(music));
-
-             
-
-                return Ok(await _service.FavoriteSong(data));
+                return Ok(await _service.FavoriteSong(command));
             }
             catch (Exception ex)
             {

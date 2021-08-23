@@ -62,7 +62,7 @@ namespace APIMusicPlayLists.Core.Services
 
 
                 var data = await _repository.AddAsync(reg);
-                res.ReturnID = entity.Id.ToString();
+                res.ReturnID = reg.Id.ToString();
 
                 return res;
             }

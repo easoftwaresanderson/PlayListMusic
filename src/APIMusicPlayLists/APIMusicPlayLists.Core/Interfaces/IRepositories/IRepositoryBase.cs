@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace APIMusicPlayLists.Core.Interfaces.IRepositories
 {
-    public interface IRepositoryBase<T>
+    public interface IRepositoryBase<T> 
     {
         Task<T> GetByIdAsync(int id);
         Task<IEnumerable<T>> List();

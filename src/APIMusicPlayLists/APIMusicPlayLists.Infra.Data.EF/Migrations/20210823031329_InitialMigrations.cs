@@ -2,7 +2,7 @@
 
 namespace APIMusicPlayLists.Infra.Data.EF.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class InitialMigrations : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -26,6 +26,7 @@ namespace APIMusicPlayLists.Infra.Data.EF.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    UniqueID = table.Column<string>(type: "TEXT", nullable: true),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     Model = table.Column<string>(type: "TEXT", nullable: true),
                     Manufacturer = table.Column<string>(type: "TEXT", nullable: true),
@@ -33,17 +34,17 @@ namespace APIMusicPlayLists.Infra.Data.EF.Migrations
                     Platform = table.Column<string>(type: "TEXT", nullable: true),
                     Idiom = table.Column<string>(type: "TEXT", nullable: true),
                     DeviceType = table.Column<string>(type: "TEXT", nullable: true),
-                    PlayListId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PlayListID = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Device", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Device_PlayList_PlayListId",
-                        column: x => x.PlayListId,
+                        name: "FK_Device_PlayList_PlayListID",
+                        column: x => x.PlayListID,
                         principalTable: "PlayList",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -52,31 +53,36 @@ namespace APIMusicPlayLists.Infra.Data.EF.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ArtistName = table.Column<string>(type: "TEXT", nullable: true),
                     MusicName = table.Column<string>(type: "TEXT", nullable: true),
-                    PlayListId = table.Column<int>(type: "INTEGER", nullable: true)
+                    ArtistName = table.Column<string>(type: "TEXT", nullable: true),
+                    AlbumImage = table.Column<string>(type: "TEXT", nullable: true),
+                    AlbumName = table.Column<string>(type: "TEXT", nullable: true),
+                    AlbumYear = table.Column<int>(type: "INTEGER", nullable: false),
+                    AlbumNotes = table.Column<string>(type: "TEXT", nullable: true),
+                    Favorite = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlayListID = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Music", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Music_PlayList_PlayListId",
-                        column: x => x.PlayListId,
+                        name: "FK_Music_PlayList_PlayListID",
+                        column: x => x.PlayListID,
                         principalTable: "PlayList",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Device_PlayListId",
+                name: "IX_Device_PlayListID",
                 table: "Device",
-                column: "PlayListId",
+                column: "PlayListID",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Music_PlayListId",
+                name: "IX_Music_PlayListID",
                 table: "Music",
-                column: "PlayListId");
+                column: "PlayListID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

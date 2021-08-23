@@ -3,6 +3,7 @@ using APIMusicPlayLists.Core.Interfaces.IRepositories;
 using APIMusicPlayLists.Core.Interfaces.IServices;
 using APIMusicPlayLists.Infra.Shared.Commands;
 using APIMusicPlayLists.Infra.Shared.DTOs;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace APIMusicPlayLists.Core.Services
 {
     public class PlayListServices : IPlayListServices
     {
+
         private readonly IRepositoryBase<PlayList> _repository;
         private readonly IRepositoryBase<Music> _musicrepository;
 
@@ -33,13 +35,30 @@ namespace APIMusicPlayLists.Core.Services
 
         public async Task<PlayList> GetByIdAsync(int id)
         {
-            var data = await _repository.GetByIdAsync(id);
+
+            var data = await _repository.Query()
+                .Include(d => d.Musics)
+                .Where(x=> x.Id== id)
+                .FirstOrDefaultAsync();
+
+            if (data == null)
+            {
+                return null;
+            }
+
+            //var data = await _repository.GetByIdAsync(id);
+
+
             return data;
         }
 
         public async Task<PlayList> GetByDeviceIdAsync(int id)
         {
-            var data = _repository.Query().AsQueryable().Where(d => d.DeviceId == id).FirstOrDefault();
+            var data = _repository.
+                Query().
+                Where(d => d.DeviceId == id).
+                FirstOrDefault();
+
             return data;
         }
 
@@ -50,6 +69,7 @@ namespace APIMusicPlayLists.Core.Services
 
             try
             {
+
                 var playList = await GetByIdAsync(command.PlayListId);
 
                 if (playList == null)
@@ -68,17 +88,17 @@ namespace APIMusicPlayLists.Core.Services
 
                 if (command.Favorite == 1)
                 {
-                    if (playList.PlayListMusics == null)
+                    if (playList.Musics == null)
                     {
-                        playList.PlayListMusics = new List<Music>();
-                        playList.PlayListMusics.Add(music);
+                        playList.Musics = new List<Music>();
                     }
+                    playList.Musics.Add(music);
                 }
                 else
                 {
-                    if (playList.PlayListMusics != null)
+                    if (playList.Musics != null || playList.Musics.Count>=1)
                     {
-                        playList.PlayListMusics.Remove(music);
+                        playList.Musics.Remove(music);
                     }
                 }
 
@@ -107,14 +127,15 @@ namespace APIMusicPlayLists.Core.Services
                 PlayList reg = new PlayList
                 {
                     PlayListName = entity.PlayListName,
-                    DeviceId = entity.Device.Id
-
+                    DeviceId = entity.Device.Id,
+                    Musics = new List<Music>()
                 };
 
+                
 
-                foreach (MusicDTO item in entity.PlayListMusics)
+                foreach (MusicDTO item in entity.Musics)
                 {
-                    reg.PlayListMusics.Add(new Music
+                    reg.Musics.Add(new Music
                     {
                         Id = item.Id,
                         MusicName = item.MusicName,
@@ -127,7 +148,7 @@ namespace APIMusicPlayLists.Core.Services
                 }
 
                 var data = await _repository.AddAsync(reg);
-                res.ReturnID = entity.Id.ToString();
+                res.ReturnID = reg.Id.ToString();
 
                 return res;
             }
@@ -156,12 +177,16 @@ namespace APIMusicPlayLists.Core.Services
                 reg.PlayListName = entity.PlayListName;
                 reg.DeviceId = entity.Device.Id;
 
-
-                reg.PlayListMusics.Clear();
-
-                foreach (MusicDTO item in entity.PlayListMusics)
+                if (reg.Musics ==null)
                 {
-                    reg.PlayListMusics.Add(new Music
+                    reg.Musics = new List<Music>();
+                }
+
+                reg.Musics.Clear();
+
+                foreach (MusicDTO item in entity.Musics)
+                {
+                    reg.Musics.Add(new Music
                     {
                         Id = item.Id,
                         MusicName = item.MusicName,

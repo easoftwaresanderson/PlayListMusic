@@ -7,7 +7,7 @@ using System.Text;
 
 namespace APIMusicPlayLists.Core.Entities
 {
-    public class Music :BaseEntity
+    public class Music : BaseEntity
     {
         public string MusicName { get; set; }
         public string ArtistName { get; set; }
@@ -17,6 +17,10 @@ namespace APIMusicPlayLists.Core.Entities
         public string AlbumNotes { get; set; }
         public int Favorite { get; set; }
 
+        [ForeignKey("PlayListID")]
+        public int? PlayListID  { get; set; }
+        public virtual PlayList PlayList { get; set; }
 
-    }
+
+}
 }

@@ -57,13 +57,13 @@ namespace AppMusicPlayLists.ViewModels
                 if (idx >= 0)
                 {
 
-                    if (AppSettings.PlayList.PlayListMusics == null)
+                    if (AppSettings.PlayList.Musics == null)
                     {
-                        AppSettings.PlayList.PlayListMusics = new List<MusicDTO>();
+                        AppSettings.PlayList.Musics = new List<MusicDTO>();
                     }
 
                     PlayListFavoriteCommand command = new PlayListFavoriteCommand();
-                    command.Favorite = music.Favorited == 0 ? 1 : 0;
+                    command.Favorite = music.Favorite == 0 ? 1 : 0;
                     command.MusicId = music.Id;
                     command.PlayListId = AppSettings.PlayList.Id;
 
@@ -74,25 +74,25 @@ namespace AppMusicPlayLists.ViewModels
                         return;
                     }
 
-                    music.Favorited = command.Favorite;
+                    music.Favorite = command.Favorite;
 
                     //music.Favorited = music.Favorited == 0 ? 1 : 0;
 
                     _Musics[idx] = music;
                     
 
-                    if (music.Favorited == 0)
+                    if (music.Favorite == 0)
                     {
-                        if (AppSettings.PlayList.PlayListMusics.Contains(music))
+                        if (AppSettings.PlayList.Musics.Contains(music))
                         {
-                            AppSettings.PlayList.PlayListMusics.Remove(music);
+                            AppSettings.PlayList.Musics.Remove(music);
                         }
                     }
                     else
                     {
-                        if (!AppSettings.PlayList.PlayListMusics.Contains(music))
+                        if (!AppSettings.PlayList.Musics.Contains(music))
                         {
-                            AppSettings.PlayList.PlayListMusics.Add(music);
+                            AppSettings.PlayList.Musics.Add(music);
                         }
                     }
 
@@ -159,7 +159,7 @@ namespace AppMusicPlayLists.ViewModels
                 {
                     PlayListDTO playList = new PlayListDTO();
                     playList.Device = AppSettings.Device;
-                    playList.PlayListMusics = new List<MusicDTO>();
+                    playList.Musics = new List<MusicDTO>();
                     playList.PlayListName = "Favorite Songs";
 
                     var res = await PlayListsData.AddItemAsync(playList);

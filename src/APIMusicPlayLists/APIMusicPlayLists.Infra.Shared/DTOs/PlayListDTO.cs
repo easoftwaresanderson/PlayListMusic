@@ -8,6 +8,6 @@ namespace APIMusicPlayLists.Infra.Shared.DTOs
     {
         public string PlayListName { get; set; }
         public DeviceDTO Device { get; set; }
-        public virtual ICollection<MusicDTO> PlayListMusics { get; set; }
+        public virtual ICollection<MusicDTO> Musics { get; set; }
     }
 }

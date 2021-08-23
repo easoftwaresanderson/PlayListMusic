@@ -36,9 +36,9 @@ namespace AppMusicPlayLists.ViewModels
                 // TODO: Implementando o serviço de PlayList
                 // var items = await MusicsData.GetItemsAsync(true);
 
-                if (AppSettings.PlayList.PlayListMusics !=null)
+                if (AppSettings.PlayList.Musics !=null)
                 {
-                    foreach (MusicDTO item in AppSettings.PlayList.PlayListMusics)
+                    foreach (MusicDTO item in AppSettings.PlayList.Musics)
                     {
                         _Musics.Add(item);
                     }

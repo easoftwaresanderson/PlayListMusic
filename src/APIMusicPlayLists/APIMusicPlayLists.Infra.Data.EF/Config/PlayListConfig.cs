@@ -15,13 +15,15 @@ namespace APIMusicPlayLists.Infra.Data.EF.Config
         {
             builder.HasKey(x => x.Id);
 
-            //builder
-            //    .HasOne(p => p.PlayListDevice)
-            //    .WithOne(d => d.PlayList)
-            //    .HasForeignKey<Device>(e => e.PlayListId);
+            builder
+                .HasOne(p => p.Device)
+                .WithOne(d => d.PlayList)
+                .HasForeignKey<Device>(e => e.PlayListID);
 
             builder
-                  .HasMany(m => m.PlayListMusics);
+                  .HasMany(m => m.Musics)
+                  .WithOne(p => p.PlayList)
+                  .HasForeignKey(m => m.PlayListID);
 
         }
     }

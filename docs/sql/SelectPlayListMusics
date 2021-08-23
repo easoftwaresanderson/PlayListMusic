@@ -1,0 +1,6 @@
+SELECT Id,
+       PlayListName,
+       DeviceId,
+       Music.*
+  FROM PlayList inner join Music
+  on Music.PlayListID = PlayList.id ;

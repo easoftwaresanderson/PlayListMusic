@@ -40,6 +40,9 @@ namespace APIMusicPlayLists.Infra.Data.EF.Migrations
                     b.Property<string>("Platform")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("PlayListID")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("UniqueID")
                         .HasColumnType("TEXT");
 
@@ -47,6 +50,9 @@ namespace APIMusicPlayLists.Infra.Data.EF.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PlayListID")
+                        .IsUnique();
 
                     b.ToTable("Device");
                 });
@@ -78,12 +84,12 @@ namespace APIMusicPlayLists.Infra.Data.EF.Migrations
                     b.Property<string>("MusicName")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("PlayListId")
+                    b.Property<int?>("PlayListID")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlayListId");
+                    b.HasIndex("PlayListID");
 
                     b.ToTable("Music");
                 });
@@ -105,16 +111,30 @@ namespace APIMusicPlayLists.Infra.Data.EF.Migrations
                     b.ToTable("PlayList");
                 });
 
+            modelBuilder.Entity("APIMusicPlayLists.Core.Entities.Device", b =>
+                {
+                    b.HasOne("APIMusicPlayLists.Core.Entities.PlayList", "PlayList")
+                        .WithOne("Device")
+                        .HasForeignKey("APIMusicPlayLists.Core.Entities.Device", "PlayListID");
+
+                    b.Navigation("PlayList");
+                });
+
             modelBuilder.Entity("APIMusicPlayLists.Core.Entities.Music", b =>
                 {
-                    b.HasOne("APIMusicPlayLists.Core.Entities.PlayList", null)
-                        .WithMany("PlayListMusics")
-                        .HasForeignKey("PlayListId");
+                    b.HasOne("APIMusicPlayLists.Core.Entities.PlayList", "PlayList")
+                        .WithMany("Musics")
+                        .HasForeignKey("PlayListID");
+
+                    b.Navigation("PlayList");
                 });
 
             modelBuilder.Entity("APIMusicPlayLists.Core.Entities.PlayList", b =>
                 {
-                    b.Navigation("PlayListMusics");
+                    b.Navigation("Device")
+                        .IsRequired();
+
+                    b.Navigation("Musics");
                 });
 #pragma warning restore 612, 618
         }
