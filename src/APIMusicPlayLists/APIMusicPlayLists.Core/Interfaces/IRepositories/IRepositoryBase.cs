@@ -9,8 +9,8 @@ namespace APIMusicPlayLists.Core.Interfaces.IRepositories
 {
     public interface IRepositoryBase<T> 
     {
-        Task<T> GetByIdAsync(int id);
         Task<IEnumerable<T>> List();
+        Task<T> GetByIdAsync(int id);
         IEnumerable<T> QueryAbleList();
         Task<T> AddAsync(T entity);
         Task UpdateAsync(T entity);

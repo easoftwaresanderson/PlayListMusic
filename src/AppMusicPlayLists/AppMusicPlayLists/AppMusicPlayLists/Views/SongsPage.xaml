@@ -28,6 +28,9 @@
                         Margin="20,20,20,0"
                         x:Name="Form">
 
+   
+
+
             <ScrollView Orientation="Vertical"
                     VerticalOptions="FillAndExpand" FlexLayout.AlignSelf="Stretch">
 
@@ -40,11 +43,26 @@
                     </Grid.ColumnDefinitions>
 
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"  />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0"
+                    <Frame Grid.Row="0"                           
+                           IsVisible="{Binding IsNotConnected}" 
+                           Padding="5"
+                           IsClippedToBounds="False"
+                           BackgroundColor="Red" >
+                            <Label 
+                          TextColor="White"
+                          FontSize="Subtitle"
+                          Margin="0,0,0,0"
+                          HorizontalTextAlignment="Center"
+                          BackgroundColor="Transparent"
+                          Text="Please check your internet connection"/>
+                    </Frame>
+                    
+                    <Grid Grid.Row="1"
                       BackgroundColor="Transparent"
                       Padding="0,0,0,0">
 
@@ -101,7 +119,7 @@
                         ItemsSource="{Binding GetSongs,Mode=OneWay }"
                         SelectionMode="None"
                         BackgroundColor="Transparent"
-                        Grid.Row="1"
+                        Grid.Row="2"
                         >
 
                         <CollectionView.EmptyView>

@@ -17,6 +17,8 @@ namespace AppMusicPlayLists.ViewModels
 {
     public class SongsViewModel : BaseViewModel
     {
+        private string _sConnected;
+        private bool _bConnected;
         private IMusicServices MusicsData => DependencyService.Get<IMusicServices>();
         private IPlayListServices PlayListsData => DependencyService.Get<IPlayListServices>();
         private IDeviceServices DeviceData => DependencyService.Get<IDeviceServices>();
@@ -35,6 +37,11 @@ namespace AppMusicPlayLists.ViewModels
 
         public SongsViewModel()
         {
+            Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
+
+            _bConnected = !Utils.IsInternetAvaliable();
+            IsNotConnected = _bConnected;
+
             _Musics = new ObservableCollection<MusicDTO>();
 
             FavoriteCommand = new Command<MusicDTO>(OnFavoriteClicked);
@@ -45,6 +52,8 @@ namespace AppMusicPlayLists.ViewModels
 
             LoadPlayListCommand = new Command(async () => await LoadPlayListExecute());
             LoadPlayListCommand.Execute(this);
+
+          
 
         }
 
@@ -79,7 +88,7 @@ namespace AppMusicPlayLists.ViewModels
                     //music.Favorited = music.Favorited == 0 ? 1 : 0;
 
                     _Musics[idx] = music;
-                    
+
 
                     if (music.Favorite == 0)
                     {
@@ -107,6 +116,18 @@ namespace AppMusicPlayLists.ViewModels
 
             try
             {
+                  
+                //GetTextConnection = "";
+                //_bConnected = Utils.IsInternetAvaliable();
+                //IsNotConnected = !_bConnected;
+
+                if (!_bConnected)
+                {
+                    //GetTextConnection = "Please verify your internet connections";      
+                    return;
+                }
+
+
                 _Musics.Clear();
                 GetSongs = _Musics;
 
@@ -149,7 +170,16 @@ namespace AppMusicPlayLists.ViewModels
             IsBusy = true;
             try
             {
-                await GetDeviceInfo();
+                //GetTextConnection = "";
+                //_bConnected = Utils.IsInternetAvaliable();
+                //IsNotConnected = !_bConnected;
+
+                if (!_bConnected)
+                {
+                    //GetTextConnection = "Please verify your internet connections";      
+                    return;
+                }
+
 
                 AppSettings.PlayList = new PlayListDTO();
 
@@ -196,7 +226,7 @@ namespace AppMusicPlayLists.ViewModels
 
                 var device = await DeviceData.GetDeviceByUniqueID(AppSettings.Device.UniqueID);
 
-               if (device == null)
+                if (device == null)
                 {
                     AppSettings.Device.Model = DeviceInfo.Model;
                     AppSettings.Device.Manufacturer = DeviceInfo.Manufacturer;
@@ -241,6 +271,39 @@ namespace AppMusicPlayLists.ViewModels
             }
         }
 
+
+        public string GetTextConnection
+        {
+            get => _sConnected;
+            set {
+                SetProperty(ref _sConnected, value);
+                //_sConnected = value;
+            }
+        }
+
+        public bool IsNotConnected
+        {
+            get => _bConnected;
+            set {
+                SetProperty(ref _bConnected, value);
+            }
+        }
+
+        void Connectivity_ConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
+        {
+            var current = Connectivity.NetworkAccess;
+            var profiles = e.ConnectionProfiles;
+
+            if (current == NetworkAccess.Internet)
+            {
+                IsNotConnected = false;
+            }
+            else
+            {
+                IsNotConnected = true;
+            }
+
+        }
 
     }
 }

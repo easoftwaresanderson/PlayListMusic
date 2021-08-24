@@ -6,17 +6,22 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace AppMusicPlayLists.ViewModels
 {
     public class FavoritesViewModel  : BaseViewModel
     {
+        private bool _bConnected;
+
         private ObservableCollection<MusicDTO> _Musics;
         public Command LoadItemsCommand { get; }
 
         public FavoritesViewModel()
         {
+            Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
+
             _Musics = new ObservableCollection<MusicDTO>();
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
             //LoadItemsCommand.Execute(this);
@@ -78,6 +83,31 @@ namespace AppMusicPlayLists.ViewModels
                 _Musics = value;
                 SetProperty(ref _Musics, value);
             }
+        }
+
+        public bool IsNotConnected
+        {
+            get => _bConnected;
+            set
+            {
+                SetProperty(ref _bConnected, value);
+            }
+        }
+
+        void Connectivity_ConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
+        {
+            var current = Connectivity.NetworkAccess;
+            var profiles = e.ConnectionProfiles;
+
+            if (current == NetworkAccess.Internet)
+            {
+                IsNotConnected = false;
+            }
+            else
+            {
+                IsNotConnected = true;
+            }
+
         }
 
     }

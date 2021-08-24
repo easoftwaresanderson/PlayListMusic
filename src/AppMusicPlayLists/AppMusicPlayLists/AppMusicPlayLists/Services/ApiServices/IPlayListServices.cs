@@ -14,7 +14,6 @@ namespace AppMusicPlayLists.Services.ApiServices
         Task<PlayListDTO> GetItemAsync(int id);
         Task<PlayListDTO> GetPlayListByDeviceIDAsync(int id);
         Task<IEnumerable<PlayListDTO>> GetItemsAsync(bool forceRefresh = false);
-
         Task<ResultDTO> FavoriteSong(PlayListFavoriteCommand command);
 
     }

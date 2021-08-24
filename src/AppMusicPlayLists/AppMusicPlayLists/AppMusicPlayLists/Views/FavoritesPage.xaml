@@ -36,11 +36,26 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
+                        
+                        <Frame Grid.Row="0"                           
+                           IsVisible="{Binding IsNotConnected}" 
+                           Padding="5"
+                           IsClippedToBounds="False"
+                           BackgroundColor="Red" >
+                            <Label 
+                              TextColor="White"
+                              FontSize="Subtitle"
+                              Margin="0,0,0,0"
+                              HorizontalTextAlignment="Center"
+                              BackgroundColor="Transparent"
+                              Text="Please check your internet connection"/>
+                        </Frame>
 
-                        <Grid Grid.Row="0"
-                      BackgroundColor="Transparent"
-                      Padding="0,0,0,0">
+                        <Grid Grid.Row="1"
+                              BackgroundColor="Transparent"
+                              Padding="0,0,0,0">
 
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -95,7 +110,7 @@
                         ItemsSource="{Binding GetSongs}"
                         SelectionMode="None"
                         BackgroundColor="Transparent"
-                        Grid.Row="1"
+                        Grid.Row="2"
                         >
 
                             <CollectionView.EmptyView>
@@ -139,14 +154,14 @@
                                             <RowDefinition Height="1"/>
                                         </Grid.RowDefinitions>
 
-                                        <!--<Label 
+                                        <Label 
                                             Grid.Row="0"
                                             Grid.Column="0"
                                             Grid.RowSpan="3"
                                             Text="{Binding Id}" 
                                             LineBreakMode="NoWrap"
                                             FontSize="Small"
-                                            TextColor="{StaticResource Secondary}" />-->
+                                            TextColor="{StaticResource Secondary}" />
 
                                         <Image Source="{Binding AlbumImage, TargetNullValue='PictureGray'}"
                                         Grid.Row="0"
