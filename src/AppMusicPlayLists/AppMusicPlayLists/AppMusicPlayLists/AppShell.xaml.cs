@@ -18,9 +18,7 @@ namespace AppMusicPlayLists
 
             GetPermissions();
 
-           
         }
-           
 
         private async Task GetPermissions()
         {
@@ -64,6 +62,8 @@ namespace AppMusicPlayLists
                 return false;
             }
         }
+
+
 
 
 

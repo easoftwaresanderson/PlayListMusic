@@ -13,7 +13,7 @@ namespace AppMusicPlayLists.ViewModels
 {
     public class FavoritesViewModel  : BaseViewModel
     {
-        private bool _bConnected;
+        private bool _bNotConnected;
 
         private ObservableCollection<MusicDTO> _Musics;
         public Command LoadItemsCommand { get; }
@@ -87,10 +87,10 @@ namespace AppMusicPlayLists.ViewModels
 
         public bool IsNotConnected
         {
-            get => _bConnected;
+            get => _bNotConnected;
             set
             {
-                SetProperty(ref _bConnected, value);
+                SetProperty(ref _bNotConnected, value);
             }
         }
 

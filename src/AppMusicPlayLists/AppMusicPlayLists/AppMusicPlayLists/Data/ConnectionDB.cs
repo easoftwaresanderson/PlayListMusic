@@ -1,9 +1,12 @@
 ﻿using APIMusicPlayLists.Infra.Shared.DTOs;
 using SQLite;
 using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Xamarin.Forms;
+
 
 namespace AppMusicPlayLists
 {
@@ -15,10 +18,15 @@ namespace AppMusicPlayLists
         private static bool _bConnectionOpen;
         private static bool _bTrnAberta;
 
-        public static bool AbreConexaoDB(bool bdDemonstracao = false)
+        public static bool OpenConnnection()
         {
             try
             {
+                if(_bConnectionOpen)
+                {
+                    return true;
+                }
+
                 var config = DependencyService.Get<IConfig>();
                 
               
@@ -27,7 +35,7 @@ namespace AppMusicPlayLists
 
                 _conexao = new SQLiteConnection(_sCaminhoDB);
 
-                if (!VerificaDB())
+                if (!VerifyDB())
                 {
                     return false;
                 }
@@ -39,31 +47,30 @@ namespace AppMusicPlayLists
             }
             catch (DllNotFoundException ex)
             {
-                Debug.Write("Biblioteca SQLite não localizada.\nErro:" + ex.Message);
+                Debug.Write("SQLite Library not found.\nErr:" + ex.Message);
                 return false;
             }
             catch (Exception ex)
             {
-                throw ex;
-
+                Debug.Write("SQLite Library not found.\nErr:" + ex.Message);
+                return false;
             }
 
         }
 
-
-        private static bool VerificaDB()
+        private static bool VerifyDB()
         {
             try
             {
                 _conexao.CreateTable<MusicDTO>();
 
-                _conexao.CreateTable<PlayListDTO>();
+                //_conexao.CreateTable<PlayListDTO>();
 
                 return true;
             }
             catch (Exception ex)
             {
-                Debug.Write("Falha ao criar banco de dados.\n" + ex.Message);
+                Debug.Write("Fail to create database.\n" + ex.Message);
                 return false;
             }
 
@@ -220,6 +227,8 @@ namespace AppMusicPlayLists
             }
 
         }
+
+     
 
     }
 }
