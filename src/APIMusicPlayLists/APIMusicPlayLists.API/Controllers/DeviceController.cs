@@ -114,12 +114,12 @@ namespace APIMusicPlayLists.API.Controllers
         }
 
         // GET api/<PlayListController>/5
-        [HttpGet("uniqueid/{id}")]
-        public async Task<ActionResult<Device>> GetByUniqueDeviceID(string id)
+        [HttpGet("uniqueid/{UniqueID}")]
+        public async Task<ActionResult<Device>> GetByUniqueDeviceID(string UniqueID)
         {
             try
             {
-                var reg = await _service.GetByDeviceIdAsync(id);
+                var reg = await _service.GetByUniqueDeviceID(UniqueID);
 
                 if (reg == null)
                 {

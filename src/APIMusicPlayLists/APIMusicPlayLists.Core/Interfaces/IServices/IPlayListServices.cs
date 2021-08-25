@@ -12,7 +12,7 @@ namespace APIMusicPlayLists.Core.Interfaces.IServices
     {
         Task<IEnumerable<PlayList>> Get();
         Task<PlayList> GetByIdAsync(int id);
-        Task<PlayList> GetByDeviceIdAsync(int id);
+        Task<PlayList> GetByDeviceIdAsync(int DeviceID);
         Task<ResultDTO> PostAsync(PlayListDTO entity);
         Task<ResultDTO> PutAsync(PlayListDTO entity);
         Task<ResultDTO> DeleteAsync(int id);

@@ -15,14 +15,14 @@ namespace AppMusicPlayLists.ViewModels
     {
         private bool _bNotConnected;
 
-        private ObservableCollection<MusicDTO> _Musics;
+        private ObservableCollection<PlayListMusics> _Musics;
         public Command LoadItemsCommand { get; }
 
         public FavoritesViewModel()
         {
             Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
 
-            _Musics = new ObservableCollection<MusicDTO>();
+            _Musics = new ObservableCollection<PlayListMusics>();
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
             //LoadItemsCommand.Execute(this);
         }
@@ -41,9 +41,9 @@ namespace AppMusicPlayLists.ViewModels
                 // TODO: Implementando o serviço de PlayList
                 // var items = await MusicsData.GetItemsAsync(true);
 
-                if (AppSettings.PlayList.Musics !=null)
+                if (AppSettings.PlayListMusics !=null)
                 {
-                    foreach (MusicDTO item in AppSettings.PlayList.Musics)
+                    foreach (PlayListMusics item in AppSettings.PlayListMusics)
                     {
                         _Musics.Add(item);
                     }
@@ -75,7 +75,7 @@ namespace AppMusicPlayLists.ViewModels
         }
 
 
-        public ObservableCollection<MusicDTO> GetSongs
+        public ObservableCollection<PlayListMusics> GetSongs
         {
             get => _Musics;
             set

@@ -6,6 +6,6 @@ namespace APIMusicPlayLists.Infra.Shared.DTOs
 {
     public class BaseDTO 
     {
-        public int Id { get; set; }
+        public virtual int Id { get; set; }
     }
 }

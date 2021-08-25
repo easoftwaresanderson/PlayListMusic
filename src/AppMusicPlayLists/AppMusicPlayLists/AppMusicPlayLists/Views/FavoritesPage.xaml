@@ -154,14 +154,14 @@
                                             <RowDefinition Height="1"/>
                                         </Grid.RowDefinitions>
 
-                                        <Label 
+                                        <!--<Label 
                                             Grid.Row="0"
                                             Grid.Column="0"
                                             Grid.RowSpan="3"
                                             Text="{Binding Id}" 
                                             LineBreakMode="NoWrap"
                                             FontSize="Small"
-                                            TextColor="{StaticResource Secondary}" />
+                                            TextColor="{StaticResource Secondary}" />-->
 
                                         <Image Source="{Binding AlbumImage, TargetNullValue='PictureGray'}"
                                         Grid.Row="0"

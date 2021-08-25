@@ -28,8 +28,6 @@
                         Margin="20,20,20,0"
                         x:Name="Form">
 
-   
-
 
             <ScrollView Orientation="Vertical"
                     VerticalOptions="FillAndExpand" FlexLayout.AlignSelf="Stretch">

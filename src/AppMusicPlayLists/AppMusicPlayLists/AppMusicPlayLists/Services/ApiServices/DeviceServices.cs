@@ -60,7 +60,7 @@ namespace AppMusicPlayLists.Services.ApiServices
             }
         }
 
-        public async Task<DeviceDTO> GetDeviceByUniqueID(string id)
+        public async Task<DeviceDTO> GetDeviceByUniqueID(string DeviceID)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace AppMusicPlayLists.Services.ApiServices
 
                 httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var func = new Func<Task<DeviceDTO>>(() => GetRequestItem($"{_apiEndPoint}/uniqueid/{id}"));
+                var func = new Func<Task<DeviceDTO>>(() => GetRequestItem($"{_apiEndPoint}/uniqueid/{DeviceID}"));
 
                 var item =  await _networkService.Retry<DeviceDTO>(func, 3, OnRetry);
 

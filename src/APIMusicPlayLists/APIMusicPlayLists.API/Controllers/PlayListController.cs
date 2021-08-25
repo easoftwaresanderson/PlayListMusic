@@ -53,7 +53,7 @@ namespace APIMusicPlayLists.API.Controllers
 
         // GET api/<PlayListController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<PlayList>> Get(int id)
+        public async Task<ActionResult<PlayListDTO>> Get(int id)
         {
             try
             {
@@ -64,7 +64,14 @@ namespace APIMusicPlayLists.API.Controllers
                     return NotFound();
                 }
 
-                return Ok(reg);
+                if (reg == null)
+                {
+                    return NotFound();
+                }
+
+                var data = MapPlayListDTO(reg);
+
+                return Ok(data);
 
             }
             catch (Exception ex)
@@ -74,25 +81,77 @@ namespace APIMusicPlayLists.API.Controllers
         }
 
         // GET api/<PlayListController>/5
-        [HttpGet("device/{id}")]
-        public async Task<ActionResult<PlayList>> GetByDeviceID(int id)
+        [HttpGet("device/{DeviceId}")]
+        public async Task<ActionResult<PlayListDTO>> GetByDeviceID(int DeviceId)
         {
             try
             {
-                var reg = await _service.GetByDeviceIdAsync(id);
+                var reg = await _service.GetByDeviceIdAsync(DeviceId);
 
                 if (reg == null)
                 {
                     return NotFound();
                 }
 
-                return Ok(reg);
+                var data = MapPlayListDTO(reg);
+
+                return Ok(data);
 
             }
             catch (Exception ex)
             {
                 return new JsonResult(new { code = ex.GetHashCode(), message = "Oh no.. something bad happened :(", description = ex.Message });
             }
+        }
+
+        private PlayListDTO MapPlayListDTO(PlayList reg)
+        {
+            var data = new PlayListDTO
+            {
+                Id = reg.Id,
+                PlayListName = reg.PlayListName,
+            };
+
+            if (reg.Device != null)
+            {
+                data.Device = new DeviceDTO
+                {
+                    Id = reg.Device.Id,
+                    DeviceType = reg.Device.DeviceType,
+                    Idiom = reg.Device.Idiom,
+                    Manufacturer = reg.Device.Manufacturer,
+                    Model = reg.Device.Model,
+                    Name = reg.Device.Name,
+                    Platform = reg.Device.Platform,
+                    UniqueID = reg.Device.UniqueID,
+                    VersionString = reg.Device.VersionString
+                };
+            }
+
+
+            data.Musics = new List<MusicDTO>();
+
+            if (reg.Musics != null)
+            {
+                foreach (Music music in reg.Musics)
+                {
+                    MusicDTO musicDTO = new MusicDTO
+                    {
+                        Id = music.Id,
+                        MusicName = music.MusicName,
+                        AlbumImage = music.AlbumImage,
+                        AlbumName = music.AlbumName,
+                        AlbumNotes = music.AlbumNotes,
+                        AlbumYear = music.AlbumYear,
+                        ArtistName = music.ArtistName,
+                        Favorite = music.Favorite
+                    };
+
+                    data.Musics.Add(musicDTO);
+                }
+            }
+
+            return data;
         }
 
         // POST api/<PlayListController>

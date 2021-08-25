@@ -34,7 +34,7 @@ namespace APIMusicPlayLists.Core.Services
             return data;
         }
 
-        public async Task<Device> GetByDeviceIdAsync(string id)
+        public async Task<Device> GetByUniqueDeviceID(string id)
         {
             var data = _repository.Query().AsQueryable().Where(d => d.UniqueID.Equals(id)).FirstOrDefault();
             return data;

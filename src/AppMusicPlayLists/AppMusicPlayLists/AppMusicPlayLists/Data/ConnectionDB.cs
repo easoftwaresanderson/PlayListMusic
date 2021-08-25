@@ -1,4 +1,5 @@
 ﻿using APIMusicPlayLists.Infra.Shared.DTOs;
+using AppMusicPlayLists.Models;
 using SQLite;
 using System;
 using System.Collections.ObjectModel;
@@ -62,9 +63,16 @@ namespace AppMusicPlayLists
         {
             try
             {
-                _conexao.CreateTable<MusicDTO>();
+                _conexao.DropTable<Music>();
+                _conexao.DropTable<PlayList>();
+                _conexao.DropTable<PlayListMusics>();
+                
+                //_conexao.DropTable<SyncMusics>();
 
-                //_conexao.CreateTable<PlayListDTO>();
+                _conexao.CreateTable<Music>();
+                _conexao.CreateTable<PlayList>();
+                _conexao.CreateTable<PlayListMusics>();
+                _conexao.CreateTable<SyncMusics>();
 
                 return true;
             }
@@ -212,7 +220,7 @@ namespace AppMusicPlayLists
 
         }
 
-        public static bool Delete<T>(ref T Entity)
+        public static bool Delete<T>(T Entity)
         {
 
             try

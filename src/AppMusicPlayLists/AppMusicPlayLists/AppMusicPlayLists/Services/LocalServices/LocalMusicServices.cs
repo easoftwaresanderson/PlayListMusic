@@ -1,4 +1,6 @@
-﻿using APIMusicPlayLists.Infra.Shared.DTOs;
+﻿using APIMusicPlayLists.Infra.Shared.Commands;
+using APIMusicPlayLists.Infra.Shared.DTOs;
+using AppMusicPlayLists.Models;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -16,15 +18,15 @@ namespace AppMusicPlayLists.Services.LocalServices
             _conexao = ConnectionDB.GetConnection();
         }
 
-        public bool GetQuery(ref MusicDTO Entity, string sQuery = "", object[] QueryParameters = null, string sOrder = "")
+        public bool GetQuery(ref Music Entity, string sQuery = "", object[] QueryParameters = null, string sOrder = "")
         {
             try
             {
 
-                List<MusicDTO> ListRet = new List<MusicDTO>();
+                List<Music> ListRet = new List<Music>();
 
 
-                string sSQL = "SELECT * FROM MusicDTO ";
+                string sSQL = "SELECT * FROM Music ";
 
 
                 if (!String.IsNullOrEmpty(sQuery))
@@ -48,7 +50,7 @@ namespace AppMusicPlayLists.Services.LocalServices
                     sSQL += sOrder;
                 }
 
-                ListRet = _conexao.Query<MusicDTO>(sSQL, QueryParameters);
+                ListRet = _conexao.Query<Music>(sSQL, QueryParameters);
 
                 if (ListRet.Count > 0)
                 {
@@ -70,12 +72,12 @@ namespace AppMusicPlayLists.Services.LocalServices
 
         }
 
-        public MusicDTO ListByID(int id)
+        public Music ListByID(int id)
         {
             try
             {
 
-                var list = _conexao.Query<MusicDTO>("SELECT * FROM MusicDTO WHERE id=" + id);
+                var list = _conexao.Query<Music>("SELECT * FROM Music WHERE id=" + id);
 
                 if (list.Count > 0)
                 {
@@ -95,15 +97,15 @@ namespace AppMusicPlayLists.Services.LocalServices
 
         }
 
-        public ObservableCollection<MusicDTO> List()
+        public ObservableCollection<Music> List()
         {
             try
             {
-                ObservableCollection<MusicDTO> Lst = new ObservableCollection<MusicDTO>();
+                ObservableCollection<Music> Lst = new ObservableCollection<Music>();
 
-                var list = _conexao.Query<MusicDTO>("SELECT * FROM MusicDTO");
+                var list = _conexao.Query<Music>("SELECT * FROM Music");
 
-                Lst = new ObservableCollection<MusicDTO>(list);
+                Lst = new ObservableCollection<Music>(list);
 
                 return Lst;
             }
@@ -115,5 +117,8 @@ namespace AppMusicPlayLists.Services.LocalServices
             }
 
         }
+
+
+       
     }
 }

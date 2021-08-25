@@ -12,6 +12,7 @@ using AppMusicPlayLists.Models;
 using Plugin.DeviceInfo;
 using Xamarin.Essentials;
 using APIMusicPlayLists.Infra.Shared.Commands;
+using AppMusicPlayLists.Services.LocalServices;
 
 namespace AppMusicPlayLists.ViewModels
 {
@@ -21,18 +22,20 @@ namespace AppMusicPlayLists.ViewModels
         private bool _bNotConnected;
         private IMusicServices MusicsData => DependencyService.Get<IMusicServices>();
         private IPlayListServices PlayListsData => DependencyService.Get<IPlayListServices>();
-        private IDeviceServices DeviceData => DependencyService.Get<IDeviceServices>();
 
-
-        private ObservableCollection<MusicDTO> _Musics;
+        private ObservableCollection<Music> _Musics;
 
         public Command LoadItemsCommand { get; }
+        public Command ExecuteTaskCommand { get; }
         public Command LoadPlayListCommand { get; }
         public Command FavoriteCommand
         {
             get;
             set;
         }
+
+        public Command SyncItemsCommand { get; }
+
 
         public SongsViewModel()
         {
@@ -41,70 +44,158 @@ namespace AppMusicPlayLists.ViewModels
             _bNotConnected = !Utils.IsInternetAvaliable();
             IsNotConnected = _bNotConnected;
 
-            _Musics = new ObservableCollection<MusicDTO>();
+            _Musics = new ObservableCollection<Music>();
 
-            FavoriteCommand = new Command<MusicDTO>(OnFavoriteClicked);
+            SyncItemsCommand = new Command(async () => await ExecuteSyncDataCommand());
+
+            FavoriteCommand = new Command<Music>(OnFavoriteClicked);
 
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
             //RefreshView already start execute
-            LoadItemsCommand.Execute(this);
+            //LoadItemsCommand.Execute(this);
 
-            LoadPlayListCommand = new Command(async () => await LoadPlayListExecute());
-            LoadPlayListCommand.Execute(this);
+            LoadPlayListCommand = new Command(async () => await ExecuteLoadPlayList());
 
-          
+
+            ExecuteTaskCommand = new Command(async () => await ExecuteTask());
+            ExecuteTaskCommand.Execute(this);
 
         }
 
-        private async void OnFavoriteClicked(MusicDTO music)
+        private async Task ExecuteTask()
         {
-            if (music != null)
+            bool _bConnectedDB = ConnectionDB.OpenConnnection();
+
+            var Task1 = Task.Run(
+             async () =>
+             {
+                 return await ExecuteGetDeviceInfo();
+
+             })
+               .ContinueWith(
+               Task2 =>
+               {
+
+                   if (_bConnectedDB)
+                   {
+                       SyncItemsCommand.Execute(this);
+                   }
+
+
+               }, TaskContinuationOptions.OnlyOnRanToCompletion)
+               .ContinueWith(
+               Task3 =>
+               {
+                   LoadPlayListCommand.Execute(this);
+
+               }, TaskContinuationOptions.OnlyOnRanToCompletion);
+
+
+        }
+
+        async Task<bool> ExecuteGetDeviceInfo()
+        {
+            try
             {
-                int idx = _Musics.IndexOf(music);
+                await AppSettings.GetDeviceInfo();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return false;
+            }
+        }
 
-                if (idx >= 0)
+        async Task ExecuteSyncDataCommand()
+        {
+            try
+            {
+                SyncData syncData = new SyncData();
+                await syncData.Execute();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
+
+        private async void OnFavoriteClicked(Music music)
+        {
+            try
+            {
+                if (music != null)
                 {
+                    int idx = _Musics.IndexOf(music);
 
-                    if (AppSettings.PlayList.Musics == null)
+                    if (idx >= 0)
                     {
-                        AppSettings.PlayList.Musics = new List<MusicDTO>();
-                    }
-
-                    PlayListFavoriteCommand command = new PlayListFavoriteCommand();
-                    command.Favorite = music.Favorite == 0 ? 1 : 0;
-                    command.MusicId = music.Id;
-                    command.PlayListId = AppSettings.PlayList.Id;
-
-                    var res = await PlayListsData.FavoriteSong(command);
-
-                    if (!res.Success)
-                    {
-                        return;
-                    }
-
-                    music.Favorite = command.Favorite;
-
-                    //music.Favorited = music.Favorited == 0 ? 1 : 0;
-
-                    _Musics[idx] = music;
-
-
-                    if (music.Favorite == 0)
-                    {
-                        if (AppSettings.PlayList.Musics.Contains(music))
+                        if (AppSettings.PlayListMusics == null)
                         {
-                            AppSettings.PlayList.Musics.Remove(music);
+                            AppSettings.PlayListMusics = new ObservableCollection<PlayListMusics>();
                         }
-                    }
-                    else
-                    {
-                        if (!AppSettings.PlayList.Musics.Contains(music))
-                        {
-                            AppSettings.PlayList.Musics.Add(music);
-                        }
-                    }
 
+                        PlayListFavoriteCommand command = new PlayListFavoriteCommand();
+                        command.Favorite = music.Favorite == 0 ? 1 : 0;
+                        command.MusicId = music.Id;
+                        command.PlayListId = AppSettings.PlayList.Id;
+
+                        if (_bNotConnected)
+                        {
+                            LocalPlayListServices localPlayListServices = new LocalPlayListServices();
+
+                            if (!localPlayListServices.AddSyncMusics(command))
+                            {
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            var res = await PlayListsData.FavoriteSong(command);
+
+                            if (!res.Success)
+                            {
+                                return;
+                            }
+                        }
+
+                        music.Favorite = command.Favorite;
+
+                        _Musics[idx] = music;
+
+                        PlayListMusics playListMusic = new PlayListMusics
+                        {
+                            AlbumImage = music.AlbumImage,
+                            AlbumName = music.AlbumName,
+                            MusicName = music.MusicName,
+                            MusicId = music.Id,
+                            PlayListId = AppSettings.PlayList.Id,
+                        };
+
+                        var retMusic = AppSettings.PlayListMusics.Where(x => x.MusicId == music.Id).FirstOrDefault();
+
+                        if (music.Favorite == 0)
+                        {
+                            if (retMusic != null)
+                            {
+                                AppSettings.PlayListMusics.Remove(retMusic);
+                            }
+                        }
+                        else
+                        {
+                            if (retMusic == null)
+                            {
+                                AppSettings.PlayListMusics.Add(playListMusic);
+                            }
+                        }
+
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+
+                Debug.WriteLine("Fail to Favorite/Unfavorite music.\nErr : " + ex.Message);
             }
         }
 
@@ -115,21 +206,34 @@ namespace AppMusicPlayLists.ViewModels
 
             try
             {
-               
+
                 if (_bNotConnected)
                 {
                     return;
                 }
-
 
                 _Musics.Clear();
                 GetSongs = _Musics;
 
                 //Desabilitar para acessar a API
                 var items = await MusicsData.GetItemsAsync(true);
+
+
                 foreach (var item in items)
                 {
-                    _Musics.Add(item);
+                    Music music = new Music
+                    {
+                        Id = item.Id,
+                        MusicName = item.MusicName,
+                        AlbumImage = item.AlbumImage,
+                        AlbumName = item.AlbumName,
+                        AlbumNotes = item.AlbumNotes,
+                        AlbumYear = item.AlbumYear,
+                        Favorite = item.Favorite,
+                        ArtistName = item.ArtistName
+                    };
+
+                    _Musics.Add(music);
                 }
 
                 GetSongs = _Musics;
@@ -159,19 +263,18 @@ namespace AppMusicPlayLists.ViewModels
             }
         }
 
-        async Task LoadPlayListExecute()
+        async Task ExecuteLoadPlayList()
         {
             IsBusy = true;
             try
             {
+                AppSettings.PlayList = new PlayList();
+
 
                 if (_bNotConnected)
                 {
                     return;
                 }
-
-
-                AppSettings.PlayList = new PlayListDTO();
 
                 var item = await PlayListsData.GetPlayListByDeviceIDAsync(AppSettings.Device.Id);
 
@@ -193,7 +296,33 @@ namespace AppMusicPlayLists.ViewModels
 
                 }
 
-                AppSettings.PlayList = item;
+                PlayList list = new PlayList
+                {
+                    Id = item.Id,
+                    PlayListName = item.PlayListName
+                };
+
+
+                AppSettings.PlayList = list;
+
+                if (item.Musics !=null)
+                {
+                    AppSettings.PlayListMusics = new ObservableCollection<PlayListMusics>();
+
+                    foreach (MusicDTO music in item.Musics)
+                    {
+                        PlayListMusics playListMusic = new PlayListMusics
+                        {
+                            AlbumImage = music.AlbumImage,
+                            AlbumName = music.AlbumName,
+                            MusicName = music.MusicName,
+                            MusicId = music.Id,
+                            PlayListId = AppSettings.PlayList.Id,
+                        };
+
+                        AppSettings.PlayListMusics.Add(playListMusic);
+                    }
+                }
 
             }
             catch (Exception ex)
@@ -206,52 +335,9 @@ namespace AppMusicPlayLists.ViewModels
             }
         }
 
-        private async Task GetDeviceInfo()
-        {
-            try
-            {
-                AppSettings.Device = new DeviceDTO();
 
-                AppSettings.Device.UniqueID = CrossDeviceInfo.Current.Id;
 
-                var device = await DeviceData.GetDeviceByUniqueID(AppSettings.Device.UniqueID);
-
-                if (device == null)
-                {
-                    AppSettings.Device.Model = DeviceInfo.Model;
-                    AppSettings.Device.Manufacturer = DeviceInfo.Manufacturer;
-                    AppSettings.Device.Name = DeviceInfo.Name;
-                    AppSettings.Device.VersionString = DeviceInfo.VersionString;
-                    AppSettings.Device.Platform = DeviceInfo.Platform.ToString();
-                    AppSettings.Device.Idiom = DeviceInfo.Idiom.ToString();
-                    AppSettings.Device.DeviceType = DeviceInfo.DeviceType.ToString();
-
-                    var res = await DeviceData.AddItemAsync(AppSettings.Device);
-
-                    if (!res.Success)
-                    {
-                        return;
-                    }
-
-                    device = await DeviceData.GetDeviceByUniqueID(AppSettings.Device.UniqueID);
-
-                    if (device != null)
-                        AppSettings.Device.Id = device.Id;
-
-                }
-                else
-                {
-                    AppSettings.Device = device;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Failed to get Device info \n Exception : " + ex);
-            }
-        }
-
-        public ObservableCollection<MusicDTO> GetSongs
+        public ObservableCollection<Music> GetSongs
         {
             get => _Musics;
             set
@@ -265,7 +351,8 @@ namespace AppMusicPlayLists.ViewModels
         public string GetTextConnection
         {
             get => _sConnected;
-            set {
+            set
+            {
                 SetProperty(ref _sConnected, value);
             }
         }
@@ -273,7 +360,8 @@ namespace AppMusicPlayLists.ViewModels
         public bool IsNotConnected
         {
             get => _bNotConnected;
-            set {
+            set
+            {
                 SetProperty(ref _bNotConnected, value);
             }
         }
@@ -286,6 +374,7 @@ namespace AppMusicPlayLists.ViewModels
             if (current == NetworkAccess.Internet)
             {
                 IsNotConnected = false;
+                ExecuteTaskCommand.Execute(this);
             }
             else
             {

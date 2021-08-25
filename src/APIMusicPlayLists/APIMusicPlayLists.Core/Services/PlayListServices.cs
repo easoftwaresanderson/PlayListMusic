@@ -54,10 +54,13 @@ namespace APIMusicPlayLists.Core.Services
 
         public async Task<PlayList> GetByDeviceIdAsync(int id)
         {
-            var data = _repository.
-                Query().
-                Where(d => d.DeviceId == id).
-                FirstOrDefault();
+            var data = _repository
+                .Query()
+                .AsQueryable()
+                .Include(d => d.Musics)
+                .Include(d=> d.Device)
+                .Where(d => d.DeviceId == id)
+                .FirstOrDefault();
 
             return data;
         }
@@ -92,6 +95,7 @@ namespace APIMusicPlayLists.Core.Services
                     {
                         playList.Musics = new List<Music>();
                     }
+
                     playList.Musics.Add(music);
                 }
                 else
