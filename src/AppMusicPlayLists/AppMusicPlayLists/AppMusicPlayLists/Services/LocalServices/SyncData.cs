@@ -140,15 +140,43 @@ namespace AppMusicPlayLists.Services.LocalServices
                    async TaskSync2 =>
                    {
                        await SyncMusics();
-                       
+
                    }, TaskContinuationOptions.OnlyOnRanToCompletion)
                    .ContinueWith(
                    async TaskSync3 =>
                    {
                        await SyncPlayLists();
 
-                   }, TaskContinuationOptions.OnlyOnRanToCompletion); ;
+                   }, TaskContinuationOptions.OnlyOnRanToCompletion);
 
+
+                //Task Task1 = SyncFavoritesMusic();
+                //Task Task2 = SyncMusics();
+                //Task Task3 = SyncPlayLists();
+
+
+                //var ListTasks = new List<Task> { Task1, Task2, Task3 };
+
+                //while (ListTasks.Count > 0)
+                //{
+                //    Task finishedTask = await Task.WhenAny(ListTasks);
+
+                //    if (finishedTask == Task1)
+                //    {
+                //        Console.WriteLine("SyncFavoritesMusic finished");
+                //    }
+                //    else if (finishedTask == Task2)
+                //    {
+                //        Console.WriteLine("SyncMusics finished");
+                //    }
+                //    else if (finishedTask == Task3)
+                //    {
+                //        Console.WriteLine("SyncPlayLists finished");
+                //    }
+
+                //    ListTasks.Remove(finishedTask);
+
+                //}
 
                 ConnectionDB.CommitTransaction();
 

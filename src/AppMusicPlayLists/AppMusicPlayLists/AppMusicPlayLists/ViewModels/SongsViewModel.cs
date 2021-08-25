@@ -64,7 +64,9 @@ namespace AppMusicPlayLists.ViewModels
 
         private async Task ExecuteTask()
         {
+
             bool _bConnectedDB = ConnectionDB.OpenConnnection();
+
 
             var Task1 = Task.Run(
              async () =>
@@ -90,6 +92,34 @@ namespace AppMusicPlayLists.ViewModels
 
                }, TaskContinuationOptions.OnlyOnRanToCompletion);
 
+            //Task Task1 = ExecuteGetDeviceInfo();
+            //Task Task2 = ExecuteSyncDataCommand();
+            //Task Task3 = ExecuteLoadPlayList();
+
+            //await Task.WhenAll(Task1, Task2, Task3);
+
+
+            //var ListTasks = new List<Task> { Task1, Task2, Task3 };
+
+            //while (ListTasks.Count > 0)
+            //{
+            //    Task finishedTask = await Task.WhenAny(ListTasks);
+
+            //    if (finishedTask == Task1)
+            //    {
+            //        Console.WriteLine("ExecuteGetDeviceInfo finished");
+            //    }
+            //    else if (finishedTask == Task2)
+            //    {
+            //        Console.WriteLine("ExecuteSyncDataCommand finished");
+            //    }
+            //    else if (finishedTask == Task3)
+            //    {
+            //        Console.WriteLine("ExecuteLoadPlayList finished");
+            //    }
+
+            //    ListTasks.Remove(finishedTask);
+            //}
 
         }
 
@@ -276,6 +306,16 @@ namespace AppMusicPlayLists.ViewModels
                     return;
                 }
 
+                if (AppSettings.Device == null)
+                {
+                    return;
+                }
+
+                if (AppSettings.Device.Id == 0)
+                {
+                    return;
+                }
+
                 var item = await PlayListsData.GetPlayListByDeviceIDAsync(AppSettings.Device.Id);
 
                 if (item == null)
@@ -305,7 +345,7 @@ namespace AppMusicPlayLists.ViewModels
 
                 AppSettings.PlayList = list;
 
-                if (item.Musics !=null)
+                if (item.Musics != null)
                 {
                     AppSettings.PlayListMusics = new ObservableCollection<PlayListMusics>();
 

@@ -25,32 +25,23 @@ namespace AppMusicPlayLists
             DependencyService.Register<PlayListServices>();
             DependencyService.Register<DeviceServices>();
 
-
-
-
-            ExecuteTasksCommand = new Command(async () => await ExecuteTask());
-            ExecuteTasksCommand.Execute(this);
+            //ExecuteTasksCommand = new Command(async () => await ExecuteTask());
+            //ExecuteTasksCommand.Execute(this);
 
 
             MainPage = new AppShell();
         }
 
-        private async Task ExecuteTask()
-        {
-           
+        //private async Task ExecuteTask()
+        //{
 
-           
 
-        }
+        //}
 
         protected override void OnStart()
         {
-
-
-        }
-        
-
        
+        }
 
 
         protected override void OnSleep()
