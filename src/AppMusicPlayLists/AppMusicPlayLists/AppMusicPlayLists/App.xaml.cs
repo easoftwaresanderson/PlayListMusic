@@ -11,10 +11,6 @@ namespace AppMusicPlayLists
 {
     public partial class App : Application
     {
-        public Command ExecuteTasksCommand { get; }
-
-        //public Command DeviceInfoCommand { get; }
-
 
 
         public App()
@@ -25,24 +21,17 @@ namespace AppMusicPlayLists
             DependencyService.Register<PlayListServices>();
             DependencyService.Register<DeviceServices>();
 
-            //ExecuteTasksCommand = new Command(async () => await ExecuteTask());
-            //ExecuteTasksCommand.Execute(this);
-
-
             MainPage = new AppShell();
         }
 
-        //private async Task ExecuteTask()
-        //{
-
-
-        //}
 
         protected override void OnStart()
         {
-       
+            if (ConnectionDB.OpenConnnection())
+            {
+                Debug.WriteLine("Fail to open Database");
+            }
         }
-
 
         protected override void OnSleep()
         {

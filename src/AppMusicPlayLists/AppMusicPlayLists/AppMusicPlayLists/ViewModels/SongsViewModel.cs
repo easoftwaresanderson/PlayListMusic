@@ -46,7 +46,7 @@ namespace AppMusicPlayLists.ViewModels
 
             _Musics = new ObservableCollection<Music>();
 
-            SyncItemsCommand = new Command(async () => await ExecuteSyncDataCommand());
+            SyncItemsCommand = new Command(ExecuteSyncDataCommand);
 
             FavoriteCommand = new Command<Music>(OnFavoriteClicked);
 
@@ -67,64 +67,35 @@ namespace AppMusicPlayLists.ViewModels
 
             bool _bConnectedDB = ConnectionDB.OpenConnnection();
 
-
             var Task1 = Task.Run(
              async () =>
              {
                  return await ExecuteGetDeviceInfo();
 
              })
-               .ContinueWith(
+            .ContinueWith(
                Task2 =>
                {
-
                    if (_bConnectedDB)
                    {
                        SyncItemsCommand.Execute(this);
                    }
 
-
                }, TaskContinuationOptions.OnlyOnRanToCompletion)
-               .ContinueWith(
-               Task3 =>
-               {
-                   LoadPlayListCommand.Execute(this);
+             .ContinueWith
+             (
+                Task3 =>
+                {
+                    LoadPlayListCommand.Execute(this);
 
-               }, TaskContinuationOptions.OnlyOnRanToCompletion);
-
-            //Task Task1 = ExecuteGetDeviceInfo();
-            //Task Task2 = ExecuteSyncDataCommand();
-            //Task Task3 = ExecuteLoadPlayList();
-
-            //await Task.WhenAll(Task1, Task2, Task3);
-
-
-            //var ListTasks = new List<Task> { Task1, Task2, Task3 };
-
-            //while (ListTasks.Count > 0)
-            //{
-            //    Task finishedTask = await Task.WhenAny(ListTasks);
-
-            //    if (finishedTask == Task1)
-            //    {
-            //        Console.WriteLine("ExecuteGetDeviceInfo finished");
-            //    }
-            //    else if (finishedTask == Task2)
-            //    {
-            //        Console.WriteLine("ExecuteSyncDataCommand finished");
-            //    }
-            //    else if (finishedTask == Task3)
-            //    {
-            //        Console.WriteLine("ExecuteLoadPlayList finished");
-            //    }
-
-            //    ListTasks.Remove(finishedTask);
-            //}
+                }, TaskContinuationOptions.OnlyOnRanToCompletion);
 
         }
 
-        async Task<bool> ExecuteGetDeviceInfo()
+        private async Task<bool> ExecuteGetDeviceInfo()
         {
+            IsBusy = true;
+
             try
             {
                 await AppSettings.GetDeviceInfo();
@@ -132,17 +103,21 @@ namespace AppMusicPlayLists.ViewModels
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
+                Debug.WriteLine(ex.Message);
                 return false;
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 
-        async Task ExecuteSyncDataCommand()
+        void ExecuteSyncDataCommand()
         {
             try
             {
                 SyncData syncData = new SyncData();
-                await syncData.Execute();
+                syncData.Execute();
             }
             catch (Exception ex)
             {
@@ -160,20 +135,17 @@ namespace AppMusicPlayLists.ViewModels
 
                     if (idx >= 0)
                     {
-                        if (AppSettings.PlayListMusics == null)
-                        {
-                            AppSettings.PlayListMusics = new ObservableCollection<PlayListMusics>();
-                        }
+
+                        LocalPlayListServices localPlayListServices = new LocalPlayListServices();
 
                         PlayListFavoriteCommand command = new PlayListFavoriteCommand();
                         command.Favorite = music.Favorite == 0 ? 1 : 0;
                         command.MusicId = music.Id;
                         command.PlayListId = AppSettings.PlayList.Id;
 
+
                         if (_bNotConnected)
                         {
-                            LocalPlayListServices localPlayListServices = new LocalPlayListServices();
-
                             if (!localPlayListServices.AddSyncMusics(command))
                             {
                                 return;
@@ -193,31 +165,12 @@ namespace AppMusicPlayLists.ViewModels
 
                         _Musics[idx] = music;
 
-                        PlayListMusics playListMusic = new PlayListMusics
+                        if (!localPlayListServices.FavoriteSong(music))
                         {
-                            AlbumImage = music.AlbumImage,
-                            AlbumName = music.AlbumName,
-                            MusicName = music.MusicName,
-                            MusicId = music.Id,
-                            PlayListId = AppSettings.PlayList.Id,
-                        };
-
-                        var retMusic = AppSettings.PlayListMusics.Where(x => x.MusicId == music.Id).FirstOrDefault();
-
-                        if (music.Favorite == 0)
-                        {
-                            if (retMusic != null)
-                            {
-                                AppSettings.PlayListMusics.Remove(retMusic);
-                            }
+                            return;
                         }
-                        else
-                        {
-                            if (retMusic == null)
-                            {
-                                AppSettings.PlayListMusics.Add(playListMusic);
-                            }
-                        }
+
+                        localPlayListServices.LoadPlayList(command.PlayListId);
 
                     }
                 }
@@ -239,15 +192,29 @@ namespace AppMusicPlayLists.ViewModels
 
                 if (_bNotConnected)
                 {
+                    GetLocalMusics();
                     return;
                 }
 
                 _Musics.Clear();
-                GetSongs = _Musics;
+
+                //Mock para design da page.
+                //_Musics = new ObservableCollection<MusicDTO>()
+                //{
+                //    new MusicDTO { Id = 1 , AlbumName = "Ten", ArtistName = "Pearl Jam" , MusicName = "Once" , AlbumImage= "pearljam.jpg" , Favorited = 0  },
+                //    new MusicDTO { Id = 2 , AlbumName = "Ten", ArtistName = "Pearl Jam" , MusicName = "Alive", AlbumImage= "pearljam.jpg" ,Favorited = 0  },
+                //    new MusicDTO { Id = 3 , AlbumName = "Ten", ArtistName = "Pearl Jam" , MusicName = "Even Flow", AlbumImage= "pearljam.jpg",Favorited = 0  },
+                //    new MusicDTO { Id = 4 , AlbumName = "Ten", ArtistName = "Pearl Jam" , MusicName = "Black" , AlbumImage= "pearljam.jpg",Favorited = 0  },
+                //    new MusicDTO { Id = 5 , AlbumName = "Ten", ArtistName = "Pearl Jam" , MusicName = "Come Back", AlbumImage= "pearljam.jpg",Favorited = 1  },
+                //    new MusicDTO { Id = 6 , AlbumName = "This is U2", ArtistName = "U2" , MusicName = "One", AlbumImage= "thisisu2.png",Favorited = 1  },
+                //    new MusicDTO { Id = 7 , AlbumName = "This is U2", ArtistName = "U2" , MusicName = "With or Without you", AlbumImage= "thisisu2.png", Favorited = 0 },
+                //    new MusicDTO { Id = 8 , AlbumName = "U2 POP", ArtistName = "U2" , MusicName = "If God Will Send His Angels" , AlbumImage= "thisisu2.png", Favorited = 1 },
+                //    new MusicDTO { Id = 9 , AlbumName = "U2 POP", ArtistName = "U2" , MusicName = "Staring At The Sun"  , AlbumImage= "thisisu2.png"  , Favorited = 0 },
+                //};
+
 
                 //Desabilitar para acessar a API
                 var items = await MusicsData.GetItemsAsync(true);
-
 
                 foreach (var item in items)
                 {
@@ -265,22 +232,7 @@ namespace AppMusicPlayLists.ViewModels
 
                     _Musics.Add(music);
                 }
-
-                GetSongs = _Musics;
-
-                //Mock para design da page.
-                //_Musics = new ObservableCollection<MusicDTO>()
-                //{
-                //    new MusicDTO { Id = 1 , AlbumName = "Ten", ArtistName = "Pearl Jam" , MusicName = "Once" , AlbumImage= "pearljam.jpg" , Favorited = 0  },
-                //    new MusicDTO { Id = 2 , AlbumName = "Ten", ArtistName = "Pearl Jam" , MusicName = "Alive", AlbumImage= "pearljam.jpg" ,Favorited = 0  },
-                //    new MusicDTO { Id = 3 , AlbumName = "Ten", ArtistName = "Pearl Jam" , MusicName = "Even Flow", AlbumImage= "pearljam.jpg",Favorited = 0  },
-                //    new MusicDTO { Id = 4 , AlbumName = "Ten", ArtistName = "Pearl Jam" , MusicName = "Black" , AlbumImage= "pearljam.jpg",Favorited = 0  },
-                //    new MusicDTO { Id = 5 , AlbumName = "Ten", ArtistName = "Pearl Jam" , MusicName = "Come Back", AlbumImage= "pearljam.jpg",Favorited = 1  },
-                //    new MusicDTO { Id = 6 , AlbumName = "This is U2", ArtistName = "U2" , MusicName = "One", AlbumImage= "thisisu2.png",Favorited = 1  },
-                //    new MusicDTO { Id = 7 , AlbumName = "This is U2", ArtistName = "U2" , MusicName = "With or Without you", AlbumImage= "thisisu2.png", Favorited = 0 },
-                //    new MusicDTO { Id = 8 , AlbumName = "U2 POP", ArtistName = "U2" , MusicName = "If God Will Send His Angels" , AlbumImage= "thisisu2.png", Favorited = 1 },
-                //    new MusicDTO { Id = 9 , AlbumName = "U2 POP", ArtistName = "U2" , MusicName = "Staring At The Sun"  , AlbumImage= "thisisu2.png"  , Favorited = 0 },
-                //};
+                           
 
             }
             catch (Exception ex)
@@ -293,6 +245,26 @@ namespace AppMusicPlayLists.ViewModels
             }
         }
 
+        private void GetLocalMusics()
+        {
+            try
+            {
+                LocalMusicServices localMusicServices = new LocalMusicServices();
+                _Musics.Clear();
+
+                var items = localMusicServices.List();
+
+                _Musics = items;
+
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Fail to load local musics.");
+
+            }
+        }
+
         async Task ExecuteLoadPlayList()
         {
             IsBusy = true;
@@ -300,14 +272,15 @@ namespace AppMusicPlayLists.ViewModels
             {
                 AppSettings.PlayList = new PlayList();
 
-
                 if (_bNotConnected)
                 {
+                    GetLocalPlayList();
                     return;
                 }
 
                 if (AppSettings.Device == null)
                 {
+                    IsBusy = false;
                     return;
                 }
 
@@ -353,9 +326,6 @@ namespace AppMusicPlayLists.ViewModels
                     {
                         PlayListMusics playListMusic = new PlayListMusics
                         {
-                            AlbumImage = music.AlbumImage,
-                            AlbumName = music.AlbumName,
-                            MusicName = music.MusicName,
                             MusicId = music.Id,
                             PlayListId = AppSettings.PlayList.Id,
                         };
@@ -375,14 +345,25 @@ namespace AppMusicPlayLists.ViewModels
             }
         }
 
-
+        private void GetLocalPlayList()
+        {
+            try
+            {
+                LocalPlayListServices localPlayListServices = new LocalPlayListServices();
+                localPlayListServices.LoadPlayList(0);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Fail to load local playList\nErr : " + ex.Message);
+            }
+        }
 
         public ObservableCollection<Music> GetSongs
         {
             get => _Musics;
             set
             {
-                _Musics = value;
+                //_Musics = value;
                 SetProperty(ref _Musics, value);
             }
         }
@@ -414,7 +395,9 @@ namespace AppMusicPlayLists.ViewModels
             if (current == NetworkAccess.Internet)
             {
                 IsNotConnected = false;
-                ExecuteTaskCommand.Execute(this);
+
+                SyncFavoriteSongs();
+
             }
             else
             {
@@ -422,6 +405,21 @@ namespace AppMusicPlayLists.ViewModels
             }
 
         }
+
+        void SyncFavoriteSongs()
+        {
+            SyncData syncData = new SyncData();
+
+            var Task1 = Task.Run(
+             async () =>
+             {
+                 return await syncData.SyncFavoritesMusic();
+
+             });
+           
+        }
+
+
 
     }
 }

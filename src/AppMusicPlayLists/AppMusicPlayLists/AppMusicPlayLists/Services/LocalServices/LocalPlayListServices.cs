@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace AppMusicPlayLists.Services.LocalServices
 {
@@ -116,7 +118,7 @@ namespace AppMusicPlayLists.Services.LocalServices
             }
 
         }
-          
+
         public ObservableCollection<SyncMusics> GetSyncMusics()
         {
             try
@@ -144,7 +146,7 @@ namespace AppMusicPlayLists.Services.LocalServices
             {
                 ObservableCollection<PlayListMusics> Lst = new ObservableCollection<PlayListMusics>();
 
-                var list = _conexao.Query<PlayListMusics>("SELECT * FROM PlayListMusics where PlayLisId = {0}", PlayLisId);
+                var list = _conexao.Query<PlayListMusics>("SELECT * FROM PlayListMusics where PlayListId = " +  PlayLisId);
 
                 Lst = new ObservableCollection<PlayListMusics>(list);
 
@@ -180,6 +182,139 @@ namespace AppMusicPlayLists.Services.LocalServices
             }
 
         }
+
+        public bool FavoriteSong(Music music)
+        {
+            try
+            {
+                _conexao.BeginTransaction();
+
+                var LocalMusic = _conexao.Query<Music>("SELECT * FROM Music WHERE Id=" + music.Id);
+
+                if (LocalMusic == null)
+                {
+                    Debug.WriteLine("Fail to find local music to favorite/unfavorite.");
+                    _conexao.Rollback();
+                    return false;
+                }
+
+                if (!ConnectionDB.Update<Music>(ref music))
+                {
+                    _conexao.Rollback();
+                    return false;
+                }
+
+                PlayListMusics playListMusic;
+
+                var reg = _conexao.Query<PlayListMusics>("SELECT * FROM PlayListMusics WHERE MusicId=" + music.Id);
+
+                if (reg.Count > 0)
+                {
+                    if (music.Favorite == 0)
+                    {
+                        playListMusic = reg[0];
+
+                        if (!ConnectionDB.Delete<PlayListMusics>(playListMusic))
+                        {
+                            _conexao.Rollback();
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        playListMusic = new PlayListMusics
+                        {
+                            MusicId = music.Id,
+                            PlayListId = AppSettings.PlayList.Id,
+                        };
+
+                        if (!ConnectionDB.Insert<PlayListMusics>(ref playListMusic))
+                        {
+                            _conexao.Rollback();
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    playListMusic = new PlayListMusics
+                    {
+                        MusicId = music.Id,
+                        PlayListId = AppSettings.PlayList.Id,
+                    };
+
+                    if (!ConnectionDB.Insert<PlayListMusics>(ref playListMusic))
+                    {
+                        _conexao.Rollback();
+                        return false;
+                    }
+                }
+
+                _conexao.Commit();
+
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Fail to local favorite song.\nErr : " + ex.Message);
+                _conexao.Rollback();
+                return false;
+            }
+
+        }
+
+        public void LoadPlayList(int PlayListId)
+        {
+            try
+            {
+                AppSettings.PlayList = new PlayList();
+
+                PlayList playList = new PlayList();
+
+                if (PlayListId == 0)
+                {
+                    var data = List();
+
+                    if(data==null)
+                    {
+                        return;
+                    }
+                    playList = data[0];
+                }
+                else
+                {
+                    var data = ListByID(PlayListId);
+                    
+                    if (data == null)
+                    {
+                        return;
+                    }
+
+                    playList = data;
+                }
+
+                if (playList != null)
+                {
+                    AppSettings.PlayList = playList;
+                }
+
+                AppSettings.PlayListMusics = new ObservableCollection<PlayListMusics>();
+
+                var favoriteMusics = GetPlayListMusics(playList.Id);
+
+                if (favoriteMusics != null)
+                {
+                    AppSettings.PlayListMusics = favoriteMusics;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Fail to load local playlist");
+            }
+        }
+
 
     }
 }

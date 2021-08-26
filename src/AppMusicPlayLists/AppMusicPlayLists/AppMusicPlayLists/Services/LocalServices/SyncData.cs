@@ -34,7 +34,6 @@ namespace AppMusicPlayLists.Services.LocalServices
 
             LocalMusicServices localMusicServices = new LocalMusicServices();
 
-
             foreach (var item in items)
             {
                 Music music = new Music();
@@ -86,7 +85,7 @@ namespace AppMusicPlayLists.Services.LocalServices
         }
 
 
-        public async Task SyncFavoritesMusic()
+        public async Task<bool> SyncFavoritesMusic()
         {
 
             LocalPlayListServices servicePlayList = new LocalPlayListServices();
@@ -105,19 +104,22 @@ namespace AppMusicPlayLists.Services.LocalServices
 
                 if (!res.Success)
                 {
-                    return;
+                    return false;
                 }
 
                 if (!ConnectionDB.Delete<SyncMusics>(item))
                 {
                     Debug.WriteLine(String.Format("Fail to sync music {0}", item.MusicId));
+                    return false;
                 }
             }
+
+            return true;
 
         }
 
 
-        public async Task Execute()
+        public void Execute()
         {
             try
             {
@@ -132,20 +134,14 @@ namespace AppMusicPlayLists.Services.LocalServices
                 ConnectionDB.BeginTransaction();
 
                 var Task1 = Task.Run(
-                 async () =>
+                  async () =>
                  {
-                     await SyncFavoritesMusic();
+                     await SyncPlayLists();
 
                  }).ContinueWith(
-                   async TaskSync2 =>
+                    TaskSync2 =>
                    {
-                       await SyncMusics();
-
-                   }, TaskContinuationOptions.OnlyOnRanToCompletion)
-                   .ContinueWith(
-                   async TaskSync3 =>
-                   {
-                       await SyncPlayLists();
+                       SyncMusics();
 
                    }, TaskContinuationOptions.OnlyOnRanToCompletion);
 
@@ -191,6 +187,18 @@ namespace AppMusicPlayLists.Services.LocalServices
 
         public async Task SyncPlayLists()
         {
+            if (AppSettings.Device == null)
+            {
+                return;
+            }
+
+            if (AppSettings.Device.Id == 0)
+            {
+                return;
+            }
+
+            await SyncFavoritesMusic();
+
             //Desabilitar para acessar a API
             var data = await PlayListData.GetPlayListByDeviceIDAsync(AppSettings.Device.Id);
 
@@ -200,7 +208,6 @@ namespace AppMusicPlayLists.Services.LocalServices
             }
 
             LocalPlayListServices localPlayListServices = new LocalPlayListServices();
-
 
             PlayList playlist = new PlayList();
 
@@ -227,10 +234,7 @@ namespace AppMusicPlayLists.Services.LocalServices
                         PlayListMusics playListMusics = new PlayListMusics
                         {
                             PlayListId = playlist.Id,
-                            AlbumImage = m.AlbumImage,
-                            AlbumName = m.AlbumName,
                             MusicId = m.Id,
-                            MusicName = m.MusicName
                         };
 
                         if (!ConnectionDB.Insert<PlayListMusics>(ref playListMusics))
@@ -281,10 +285,7 @@ namespace AppMusicPlayLists.Services.LocalServices
                         PlayListMusics playListMusics = new PlayListMusics
                         {
                             PlayListId = playlist.Id,
-                            AlbumImage = m.AlbumImage,
-                            AlbumName = m.AlbumName,
                             MusicId = m.Id,
-                            MusicName = m.MusicName
                         };
 
                         if (!ConnectionDB.Insert<PlayListMusics>(ref playListMusics))
@@ -296,6 +297,9 @@ namespace AppMusicPlayLists.Services.LocalServices
                     }
                 }
             }
+
+
+            localPlayListServices.LoadPlayList(data.Id);
 
         }
     }

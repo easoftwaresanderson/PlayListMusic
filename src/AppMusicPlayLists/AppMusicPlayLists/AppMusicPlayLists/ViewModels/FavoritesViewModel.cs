@@ -1,5 +1,6 @@
 ﻿using APIMusicPlayLists.Infra.Shared.DTOs;
 using AppMusicPlayLists.Models;
+using AppMusicPlayLists.Services.LocalServices;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,16 +16,18 @@ namespace AppMusicPlayLists.ViewModels
     {
         private bool _bNotConnected;
 
-        private ObservableCollection<PlayListMusics> _Musics;
+        private ObservableCollection<Music> _Musics;
         public Command LoadItemsCommand { get; }
 
         public FavoritesViewModel()
         {
             Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
+            
+            _bNotConnected = !Utils.IsInternetAvaliable();
+            IsNotConnected = _bNotConnected;
 
-            _Musics = new ObservableCollection<PlayListMusics>();
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
-            //LoadItemsCommand.Execute(this);
+            LoadItemsCommand.Execute(this);
         }
 
 
@@ -36,32 +39,38 @@ namespace AppMusicPlayLists.ViewModels
 
             try
             {
-                _Musics.Clear();
-
-                // TODO: Implementando o serviço de PlayList
-                // var items = await MusicsData.GetItemsAsync(true);
-
-                if (AppSettings.PlayListMusics !=null)
+                if(_Musics==null)
                 {
-                    foreach (PlayListMusics item in AppSettings.PlayListMusics)
-                    {
-                        _Musics.Add(item);
-                    }
+                    _Musics = new ObservableCollection<Music>();
+                }
+                else
+                {
+                    _Musics.Clear();
                 }
 
-                GetSongs = _Musics;
+                if(AppSettings.PlayList ==null)
+                {
+                    return;
+                }          
+                
+                if(AppSettings.PlayList.Id ==0)
+                {
+                    return;
+                } 
 
-                //foreach (var item in items)
-                //{
-                //    _Musics.Add(item);
-                //}
+                LocalPlayListServices localPlayListServices = new LocalPlayListServices();
+                
+                var favorites = localPlayListServices.GetPlayListMusics(AppSettings.PlayList.Id);
 
-                //_Musics = new ObservableCollection<MusicDTO>()
-                //{
-                //    new MusicDTO { Id = 5 , AlbumName = "Ten", ArtistName = "Pearl Jam" , MusicName = "Come Back", AlbumImage= "pearljam.jpg"  },
-                //    new MusicDTO { Id = 6 , AlbumName = "This is U2", ArtistName = "U2" , MusicName = "One", AlbumImage= "thisisu2.png"  },
-                //    new MusicDTO { Id = 8 , AlbumName = "U2 POP", ArtistName = "U2" , MusicName = "If God Will Send His Angels" , AlbumImage= "thisisu2.png", Favorited = 1 },
-                //};
+                LocalMusicServices localMusicServices = new LocalMusicServices();
+
+                foreach (PlayListMusics item in favorites)
+                {
+                    Music m = localMusicServices.ListByID(item.MusicId);
+
+                    if(m!=null)
+                         _Musics.Add(m);
+                }
 
             }
             catch (Exception ex)
@@ -75,12 +84,11 @@ namespace AppMusicPlayLists.ViewModels
         }
 
 
-        public ObservableCollection<PlayListMusics> GetSongs
+        public ObservableCollection<Music> GetSongs
         {
             get => _Musics;
             set
             {
-                _Musics = value;
                 SetProperty(ref _Musics, value);
             }
         }

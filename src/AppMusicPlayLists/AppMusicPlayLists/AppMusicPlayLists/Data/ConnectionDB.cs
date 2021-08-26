@@ -63,9 +63,9 @@ namespace AppMusicPlayLists
         {
             try
             {
-                _conexao.DropTable<Music>();
-                _conexao.DropTable<PlayList>();
-                _conexao.DropTable<PlayListMusics>();
+                //_conexao.DropTable<Music>();
+                //_conexao.DropTable<PlayList>();
+                //_conexao.DropTable<PlayListMusics>();
                 
                 //_conexao.DropTable<SyncMusics>();
 
